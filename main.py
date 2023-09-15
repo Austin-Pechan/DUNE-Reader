@@ -28,7 +28,7 @@ def convert_image(im):
     left = width / 6
     top = height / 2.2
     right = width / 2.25
-    bottom = height / 1.95
+    bottom = height / 1.94
     
     # Crop
     im1 = im.crop((left, top, right, bottom))
