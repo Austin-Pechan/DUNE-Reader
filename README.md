@@ -1,5 +1,7 @@
 All packages besides tesseract can be downloaded by pip installing. 
-For tesseract download refer to this YouTube video: https://youtu.be/DG5D8A3zi4o?si=ahb_7F2XOY3zBEQJ
+For tesseract download refer to YouTube video: 
+  * https://youtu.be/DG5D8A3zi4o?si=ahb_7F2XOY3zBEQJ  (Windows)
+  * https://sammybams.hashnode.dev/how-to-install-tesseract-ocr-on-macos (MAC)
 
 Note 1: The left, right, up, and down parameters are arbitrary for now, but when we get the fixed orientation that the robot camera will take we can get actual preset perameters.
 
