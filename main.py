@@ -4,7 +4,16 @@ import cv2
 import numpy as np
 import math
 import regex as re
-tes.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract'
+import platform
+
+#Assuming we are only running on either Windows or Linux OS
+OSSystem=platform.system()
+if OSSystem == 'Windows':
+    print("Running on Windows OS")
+    tes.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract'
+else:
+    print("Running on Linux OS")
+    tes.pytesseract.tesseract_cmd = r'tesseract'
 
 
 def main():
