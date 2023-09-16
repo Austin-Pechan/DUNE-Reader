@@ -21,16 +21,23 @@ def main():
 
     width, height = image.size
 
-    #arbitrary parameters
+    # parameters for COLDATA.jpg
     left = width / 2.53
     up = height / 2.9
     right = width / 2.08
     down = height / 2.5
 
+    # parameters for One_Asic (note this does not work as the image is poor quality. Only used for testing)
+    # left = width / 6
+    # up = height / 3.2
+    # right = width / 1.4
+    # down = height / 1.7
+
     im = convert_image(image, left, right, up, down)
 
     # Convert the image to text
     text = tes.pytesseract.image_to_string(im)
+
 
     # [0] = type of chip, [2] = serial_number, [3] = lot number
     text = text.split("\n")
@@ -57,7 +64,7 @@ def convert_image(im, left, right, up, down):
     im1 = ImageOps.invert(im1)
 
     # Shows the image in image viewer
-    #im1.show()
+    im1.show()
 
     return im1
 
