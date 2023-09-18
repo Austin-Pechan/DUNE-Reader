@@ -39,8 +39,21 @@ def main():
     text = tes.pytesseract.image_to_string(im)
 
 
+    print(text)
     # [0] = type of chip, [2] = serial_number, [3] = lot number
     text = text.split("\n")
+
+    # sparse out empty array elements
+    text = [x for x in text if x]
+
+    # Sparse code to remove bad info
+    text[0] = text[0].replace("|", "l")
+    text[0] = text[0].replace("[", "l")
+    text[0] = text[0].replace("]", "l")
+
+    text[2] = re.sub('[^a-zA-Z0-9]', '', text[2])
+    text[3] = re.sub('[^a-zA-Z0-9]', '', text[3])
+
 
     print("type_of_chip: " + text[0] + ", " + "serial_number: " + text[2] + ", " + "lot_number: " + text[3])
 
@@ -54,6 +67,7 @@ def convert_image(im, left, right, up, down):
     # Resize
     im1.resize((im.width * 4, im.height * 4))
 
+    # Grayscale
     im1 = im1.convert('L')
 
     # Convert to Binary Image
