@@ -19,7 +19,7 @@ else:
 
 
 def main():
-    image = Image.open('DUNE-Reader/ColdADC_test_images/Full_test_1.jpg')
+    image = Image.open('ColdADC_test_images/Full_test_1.jpg')
 
     width, height = image.size
 
@@ -101,7 +101,6 @@ def convert_image(im, left, right, up, down):
 
     im1.show()
     return im1
-
 
 
 def text_output(im):
