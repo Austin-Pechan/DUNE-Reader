@@ -1,20 +1,26 @@
 from PIL import Image
 import pytesseract as tes
 import numpy as np
-from pyclustering.cluster.kmeans import kmeans
 from pyclustering.cluster.center_initializer import kmeans_plusplus_initializer
-from pyclustering.utils import draw_clusters
 import matplotlib.pyplot as plt
-from PIL import Image, ImageOps, ImageFilter, ImageEnhance
+from PIL import Image, ImageOps, ImageEnhance
+import platform
 
-from sklearn.cluster import MiniBatchKMeans
-tes.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract'
+#Assuming we are only running on either Windows or Linux OS
+OSSystem=platform.system()
+if OSSystem == 'Windows':
+    tes.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract'
+else:
+    tes.pytesseract.tesseract_cmd = r'tesseract'
+
 
 import cv2
 import numpy as np
 
+# if it is the front side set side to 0, else set it to 1
+side = 1
+image = Image.open('ColdADC_test_images/Full_test_2.jpg')
 
-image = Image.open('ColdADC_test_images/Full_test_1.jpg')
 image_array = np.array(image)
 target_color = np.array([47, 33, 14])
 tolerance = 15
@@ -54,6 +60,8 @@ filtered_contours = [cnt for cnt in contours if cv2.contourArea(cnt) > min_conto
 for idx, contour in enumerate(filtered_contours):
     x, y, w, h = cv2.boundingRect(contour)
     print(f"Contour {idx + 1} Bounding Box: (x={x}, y={y}, w={w}, h={h})")
+    cv2.drawContours(im1, [contour], -1, (0, 255, 0), 2)
+    cv2.putText(im1, f'Contour {idx + 1}', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
 
 cv2.drawContours(im1, filtered_contours, -1, (0, 255, 0), 2)
@@ -61,5 +69,10 @@ cv2.imshow('Processed Image with Contours', im1)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
+
+
+
+
+
 
 
