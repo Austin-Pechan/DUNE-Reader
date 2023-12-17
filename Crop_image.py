@@ -46,35 +46,28 @@ gray = cv2.cvtColor(im1, cv2.COLOR_BGR2GRAY)
 
 
 # blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-blurred = cv2.medianBlur(gray, 7)
+blurred = cv2.medianBlur(gray, 9)
 
 edges = cv2.Canny(blurred, 100, 150)  # Adjust the thresholds based on your needs
 
 
 contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 min_contour_area = 1000
+min_aspect_ratio = 0.9
+max_aspect_ratio = 1.1
+
 def get_aspect_ratio(contour):
     x, y, w, h = cv2.boundingRect(contour)
     return float(w) / h if h != 0 else float('inf')
 
-# Define aspect ratio range
-min_aspect_ratio = 0.9
-max_aspect_ratio = 1.1
 
-# Filter contours based on area and aspect ratio
 filtered_contours = [cnt for cnt in contours if cv2.contourArea(cnt) > min_contour_area]
-
-# Extract coordinates of each contour
 contour_coordinates = [cnt.reshape(-1, 2) for cnt in filtered_contours]
-
-# Filter contours based on aspect ratio
 filtered_contours = [cnt for cnt in filtered_contours if min_aspect_ratio < get_aspect_ratio(cnt) < max_aspect_ratio]
 
-# Draw contours on the original image
+
 image_with_contours = np.copy(im1)
 cv2.drawContours(image_with_contours, filtered_contours, -1, (0, 255, 0), 2)
-
-# Display the enhanced image with contours using OpenCV
 cv2.imshow('Enhanced Image with Contours', image_with_contours)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
