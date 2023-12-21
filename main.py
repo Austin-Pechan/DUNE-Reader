@@ -7,6 +7,7 @@ from difflib import get_close_matches
 from skimage import io, img_as_ubyte, filters, morphology
 from skimage.restoration import denoise_tv_bregman
 import platform
+import Crop_image
 
 #Assuming we are only running on either Windows or Linux OS
 OSSystem=platform.system()
@@ -19,45 +20,33 @@ else:
 
 
 def main():
-    image = Image.open('ColdADC_test_images/Full_test_1.jpg')
+    image = Image.open('ColdADC_test_images/Full_test_2.jpg')
+    #set parameter two to 1 if it is the front side of the chip or 2 if it is the back side
+    full_test(image, 2)
 
-    width, height = image.size
+from scipy.signal import convolve2d
+from scipy.signal import wiener
+def convert_image(im):
+    kernel_size = 4
 
-    # note: coordinates start in top left of the image
+    # Create a simple averaging kernel
+    blur_kernel = np.ones((kernel_size, kernel_size)) / kernel_size**2
 
-    # parameters for im1: this image is unreadable with my current methods
-    # left = width / 7
-    # up = height / 6
-    # right = width
-    # down = height / 1.4
+    # Convolve the image with the averaging kernel to simulate blurring
+    blurred_image = convolve2d(im, blur_kernel, 'same', 'symm')
 
-    # parameters for DUNE-Reader/COLDATA.jpg
-    # left = width / 2.53
-    # up = height / 2.9
-    # right = width / 2.08
-    # down = height / 2.5
+    # Apply Wiener deconvolution
+    deblurred_image = wiener(blurred_image)
 
-    # parameters for One_Asic (note this does not work as the image is poor quality. Only used for testing)
-    # left = width / 6
-    # up = height / 3.2
-    # right = width / 1.35
-    # down = height / 1.7
+    # Ensure the deblurred image is in the valid intensity range [0, 255]
+    deblurred_image = np.clip(deblurred_image, 0, 255).astype(np.uint8)
 
-    # im = convert_image(image, left, right, up, down)
+    # Convert the deblurred image to a PIL Image
+    im1 = Image.fromarray(deblurred_image)
 
-    # # Convert the image to text
-    # text_output(im)
+    # Display the deblurred image
+    im1.show()
 
-    full_test_1(image)
-
-
-def convert_image(im, left, right, up, down):
-
-    # Crop
-    im1 = im.crop((left, up, right, down))
-
-    # Resize
-    im1.resize((im.width * 4, im.height * 4))
 
     im1 = im1.filter(ImageFilter.BoxBlur(1))
     
@@ -125,18 +114,30 @@ def text_output(im):
     print(final_text)
     return(final_text)
 
+class ImageError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+        
 
-def full_test_1(image):
-    width, height = image.size
-    image =  image.rotate(270)
-    #im_1 = convert_image(image, width/2.55, width/2.25, height/3.4, height/2.7)
-    im_2 = convert_image(image, width/2.55, width/2.25, height/1.66, height/1.52)
+def full_test(image, side):
+    array_of_images = Crop_image.contour_image(image)
+    array_of_text = []
 
-    print(tes.pytesseract.image_to_string(im_2))
+    if side == 1:
+        if len(array_of_images) != 10:
+            raise ImageError("contouring failed, please retake the image and try again")
+    elif side == 2:
+        if len(array_of_images) != 8:
+            raise ImageError("contouring failed, please retake the image and try again")
 
-#     return LArASIC_1, LArASIC_2, LArASIC_3, LArASIC_4, 
-# ColdADC_1, ColdADC_2, ColdADC_3, ColdADC_4, ColdATA_1, ColdATA_2
-
+    # for i in array_of_images:
+    #     cv2.imshow(f'Cropped Image {i}', i)
+    
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+    for i in array_of_images:
+        im1 = convert_image(i)
+        array_of_text.append(text_output(im1))
 
 if __name__ == "__main__":
     main()
