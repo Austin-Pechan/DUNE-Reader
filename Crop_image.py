@@ -29,21 +29,28 @@ def contour_image(image):
     enhanced_image = Image.fromarray(enhanced_image_array)
     enhanced_image = ImageOps.invert(enhanced_image)
     enhancer = ImageEnhance.Contrast(enhanced_image)
-    enhanced_image = enhancer.enhance(100)
+    enhanced_image = enhancer.enhance(1000)
 
     im1 = np.array(enhanced_image)
 
-    resize_factor = 0.2
+    resize_factor = 0.5
     im1 = cv2.resize(im1, (0, 0), fx=resize_factor, fy=resize_factor)
 
-    gray = cv2.cvtColor(im1, cv2.COLOR_BGR2GRAY)
+
+    image_float = im1.astype(np.float32)
+    brightness_increase = 200
+    brightened_image = image_float + brightness_increase
+    brightened_image = np.clip(brightened_image, 0, 255)
+    brightened_image = brightened_image.astype(np.uint8)
+
+    gray = cv2.cvtColor(brightened_image, cv2.COLOR_BGR2GRAY)
 
     blurred = cv2.medianBlur(gray, 11)
 
     edges = cv2.Canny(blurred, 100, 150)
 
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    min_contour_area = 1000
+    min_contour_area = 4000
     min_aspect_ratio = 0.9
     max_aspect_ratio = 1.1
 
@@ -55,11 +62,12 @@ def contour_image(image):
     filtered_contours = [cnt for cnt in filtered_contours if min_aspect_ratio < get_aspect_ratio(cnt) < max_aspect_ratio]
 
 
-    image_with_contours = np.copy(im1)
-    cv2.drawContours(image_with_contours, filtered_contours, -1, (0, 255, 0), 2)
-    cv2.imshow('Enhanced Image with Contours', image_with_contours)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # image_with_contours = np.copy(im1)
+    # cv2.drawContours(image_with_contours, filtered_contours, -1, (0, 255, 0), 2)
+    # cv2.imshow('Enhanced Image with Contours', image_with_contours)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+    
     contour_coordinates = [cv2.boundingRect(cnt) for cnt in filtered_contours]
     im2 = cv2.resize(image_array, (0, 0), fx=resize_factor, fy=resize_factor)
     cropped_images = [im2[y:y+h, x:x+w] for x, y, w, h in contour_coordinates]
