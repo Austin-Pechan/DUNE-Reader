@@ -25,28 +25,33 @@ def main():
     full_test(image, 2)
 
 def convert_image(im):
-    resize_factor = 5
+    im = Image.fromarray(im)
+    enhancer = ImageEnhance.Contrast(im)
+    im = enhancer.enhance(5)
+    im = im.convert('L')
+    im = np.array(im)
+
+    resize_factor = 1
     im = cv2.resize(im, (0, 0), fx=resize_factor, fy=resize_factor)
-    image_float = im.astype(np.float32)
-    brightness_increase = 100
-    brightened_image = image_float + brightness_increase
-    brightened_image = np.clip(brightened_image, 0, 255)
-    brightened_image = brightened_image.astype(np.uint8)
-    im1 = Image.fromarray(brightened_image)
+
+    im_sharpened = cv2.addWeighted(im, 2, cv2.GaussianBlur(im, (0, 0), 2), -1.5, 0)
+    im1 = Image.fromarray(im_sharpened)
 
 
     # im1 = im1.filter(ImageFilter.BoxBlur(1))
     im1 = im1.rotate(-90)
-    im1.show()
-    # Contrast
-    enhancer = ImageEnhance.Contrast(im1)
-    im1 = enhancer.enhance(5)
+    im1 = im1.filter(ImageFilter.SHARPEN)
 
-    # Grayscale
-    im1 = im1.convert('L')
-    # kernel_set = [1, 4, 1,
-    #               4, 12, 4,
-    #               1, 4, 1]
+
+    # # Contrast
+    # enhancer = ImageEnhance.Contrast(im1)
+    # im1 = enhancer.enhance(5)
+
+    # # Grayscale
+    # im1 = im1.convert('L')
+    # kernel_set = [3, 6, 3,
+    #               6, 24, 6,
+    #               3, 6, 3]
     # kernel = ImageFilter.Kernel(size=(3, 3), kernel=kernel_set)
 
     # # Apply the filter to the image
@@ -62,7 +67,7 @@ def convert_image(im):
 
     # # Denoise the image
     # im2 = np.array(im1)
-    # denoised_image = denoise_tv_bregman(im2, 22)
+    # denoised_image = denoise_tv_bregman(im2, 5)
     # threshold_value = filters.threshold_otsu(denoised_image)
     # binary_image = denoised_image > threshold_value
 

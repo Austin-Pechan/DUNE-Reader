@@ -33,7 +33,7 @@ def contour_image(image):
 
     im1 = np.array(enhanced_image)
 
-    resize_factor = 0.5
+    resize_factor = 0.7
     im1 = cv2.resize(im1, (0, 0), fx=resize_factor, fy=resize_factor)
 
 
@@ -50,7 +50,7 @@ def contour_image(image):
     edges = cv2.Canny(blurred, 100, 150)
 
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    min_contour_area = 4000
+    min_contour_area = 6000
     min_aspect_ratio = 0.9
     max_aspect_ratio = 1.1
 
@@ -67,7 +67,7 @@ def contour_image(image):
     # cv2.imshow('Enhanced Image with Contours', image_with_contours)
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
-    
+
     contour_coordinates = [cv2.boundingRect(cnt) for cnt in filtered_contours]
     im2 = cv2.resize(image_array, (0, 0), fx=resize_factor, fy=resize_factor)
     cropped_images = [im2[y:y+h, x:x+w] for x, y, w, h in contour_coordinates]
@@ -75,7 +75,7 @@ def contour_image(image):
     return cropped_images
 
 def main():
-    image = Image.open('ColdADC_test_images/Full_test_2.jpg')
+    image = Image.open('ColdADC_test_images/Full Test data/IMG_5151.jpg')
     cropped_images = contour_image(image)
 
     for i, cropped_image in enumerate(cropped_images):
