@@ -72,10 +72,15 @@ def contour_image(image):
     im2 = cv2.resize(image_array, (0, 0), fx=resize_factor, fy=resize_factor)
     cropped_images = [im2[y:y+h, x:x+w] for x, y, w, h in contour_coordinates]
 
-    return cropped_images
+    # Sort the images based on their coordinates
+    sorted_data = sorted(zip(cropped_images, contour_coordinates), key=lambda x: (x[1][1], x[1][0]))
+
+    sorted_images, sorted_coordinates = zip(*sorted_data)
+
+    return sorted_images
 
 def main():
-    image = Image.open('ColdADC_test_images/Full Test data/IMG_5151.jpg')
+    image = Image.open('ColdADC_test_images/Full Test data/IMG_5152.jpg')
     cropped_images = contour_image(image)
 
     for i, cropped_image in enumerate(cropped_images):

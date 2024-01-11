@@ -18,12 +18,6 @@ else:
     print("Running on Linux OS")
     tes.pytesseract.tesseract_cmd = r'tesseract'
 
-
-def main():
-    image = Image.open('ColdADC_test_images/Full_test_2.jpg')
-    #set parameter two to 1 if it is the front side of the chip or 2 if it is the back side
-    full_test(image, 2)
-
 def convert_image(im):
     im = Image.fromarray(im)
     enhancer = ImageEnhance.Contrast(im)
@@ -84,7 +78,8 @@ def convert_image(im):
 
 
 def text_output(im):
-    text = tes.pytesseract.image_to_string(im)
+    custom_config = r'--psm 3'
+    text = tes.image_to_string(im, lang='eng', config=custom_config)
 
     # [0] = type of chip, [2] = serial_number, [3] = lot number
     text = text.split("\n")
@@ -126,6 +121,12 @@ def full_test(image, side):
     for i in array_of_images:
         im1 = convert_image(i)
         array_of_text.append(text_output(im1))
+
+
+def main():
+    image = Image.open('ColdADC_test_images/Full_test_2.jpg')
+    #set parameter two to 1 if it is the front side of the chip or 2 if it is the back side
+    full_test(image, 2)
 
 if __name__ == "__main__":
     main()
