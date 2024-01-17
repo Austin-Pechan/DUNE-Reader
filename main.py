@@ -54,8 +54,9 @@ def text_output(im):
     text = text.split("\n")
 
     #sparse out empty array elements
-    text = [re.sub('[^a-zA-Z0-9/-]', '', x) for x in text if x.strip() != '']
-    text = [re.sub('[^a-zA-Z0-9/-]', '', x) for x in text if x.strip() != '']
+    text = [re.sub('[^a-zA-Z0-9/ -]', '', x) for x in text if x.strip() != '']
+    text = [re.sub('[^a-zA-Z0-9/ -]', '', x) for x in text if x.strip() != '']
+
 
     larasic = None
     for i in range(len(text)):
@@ -67,7 +68,9 @@ def text_output(im):
             break
 
     bnl = True 
+    cold = True
     lar = True
+    vers = True
     if larasic:
         i = 0
         while i < len(text):
@@ -87,7 +90,31 @@ def text_output(im):
                 else:
                     text.pop(i)
                     i -= 1
+            elif vers:
+                words = text[i].strip("'").split()
+                close_matches_vers = get_close_matches(words[0], ["Version"], cutoff=0.5)
+                if close_matches_vers and close_matches_vers[0] == "Version":
+                    vers = False
+                    text[i] = 'Version ' + words[1]
+                else:
+                    text.pop(i)
+                    i -= 1                       
             i += 1
+        text = text[:5]
+
+    else:
+        i = 0
+        while i < len(text):
+            if cold:
+                close_matches = get_close_matches(text[i], ["ColdADC", "COLDATA"], cutoff=0.6)
+                if close_matches:
+                    cold = False
+                    text[i] = close_matches[0]
+                else:
+                    text.pop(i)
+                    i -= 1
+            i += 1
+        text = text[:4]
 
     print(text)
     return(text)
