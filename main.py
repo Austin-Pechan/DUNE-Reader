@@ -103,6 +103,7 @@ def text_output(im):
         text = text[:5]
 
     else:
+        text = [re.sub('[^a-zA-Z0-9]', '', x) for x in text if x.strip() != '']
         i = 0
         while i < len(text):
             if cold:
@@ -118,6 +119,22 @@ def text_output(im):
 
     print(text)
     return(text)
+
+from collections import Counter
+
+def average_texts(texts):
+    # Ensure all lists have the same length
+    max_length = max(len(text) for text in texts)
+    padded_texts = [text + [''] * (max_length - len(text)) for text in texts]
+
+    # Calculate element-wise average
+    average_text = []
+    for chars in zip(*padded_texts):
+        counter = Counter(chars)
+        most_common_char = counter.most_common(1)[0][0]
+        average_text.append(most_common_char)
+
+    return average_text
 
 class ImageError(Exception):
     def __init__(self, message):
@@ -140,9 +157,19 @@ def full_test(image, side):
     
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
+    # for i in array_of_images:
+    #     im1 = convert_image(i, 30)
+    #     array_of_text.append(text_output(im1))
     for i in array_of_images:
-        im1 = convert_image(i)
-        array_of_text.append(text_output(im1))
+        j = 30
+        while j <= 90:
+            im1 = convert_image(i)
+            array_of_text.append(text_output(im1))
+            j += 30
+        avg = average_texts(array_of_text)
+        print("this is average:")
+        print(avg)
+
 
 
 def main():
