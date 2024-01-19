@@ -19,9 +19,10 @@ else:
     tes.pytesseract.tesseract_cmd = r'tesseract'
 
 def convert_image(im):
+    im = increase_brightness(im, 0.75)
     im = Image.fromarray(im)
     enhancer = ImageEnhance.Contrast(im)
-    im = enhancer.enhance(30)
+    im = enhancer.enhance(50)
     im = im.convert('L')
     im = np.array(im)
     _, im = cv2.threshold(im, 215, 255, cv2.THRESH_BINARY)
@@ -34,7 +35,7 @@ def convert_image(im):
 
 
     # im1 = im1.filter(ImageFilter.BoxBlur(1))
-    im1 = im1.rotate(-90)
+    # im1 = im1.rotate(-90)
     im1 = im1.filter(ImageFilter.SHARPEN)
 
 
@@ -45,6 +46,14 @@ def convert_image(im):
     # im1.show()
     return im1
 
+def increase_brightness(image, factor=1.5):
+    image_float = image.astype(np.float32)
+    brightened_image = image_float * factor
+    brightened_image = np.clip(brightened_image, 0, 255)
+    brightened_image = brightened_image.astype(np.uint8)
+
+    return brightened_image
+
 
 def text_output(im):
     custom_config = r'--psm 6'
@@ -53,57 +62,61 @@ def text_output(im):
     # [0] = type of chip, [2] = serial_number, [3] = lot number
     text = text.split("\n")
 
-    #sparse out empty array elements
-    text = [re.sub('[^a-zA-Z0-9/ -]', '', x) for x in text if x.strip() != '']
-    text = [re.sub('[^a-zA-Z0-9/ -]', '', x) for x in text if x.strip() != '']
+    text = [re.sub('[^a-zA-Z0-9/ -.]', '', x) for x in text if x.strip() != '']
+    text = [re.sub('[^a-zA-Z0-9/ -.]', '', x) for x in text if x.strip() != '']
 
-
+    # print("this is the pre text: ", text)
     larasic = None
     for i in range(len(text)):
         if get_close_matches(text[i], ["ColdADC", "COLDATA"], cutoff=0.5):
             larasic = False
             break
-        elif get_close_matches(text[i], ["LArASIC"], cutoff=0.5):
+        elif get_close_matches(text[i], ["LArASIC"], cutoff=0.3):
             larasic = True
             break
 
-    bnl = True 
     cold = True
     lar = True
     vers = True
     if larasic:
         i = 0
         while i < len(text):
-            if bnl:
-                close_matches = get_close_matches(text[i], ["BNL"], cutoff=0.5)
-                if close_matches and close_matches[0] == "BNL":
-                    bnl = False
-                    text[i] = 'BNL'
-                else:
-                    text.pop(i)
-                    i -= 1
-            elif lar:
-                close_matches_lar = get_close_matches(text[i], ["LArASIC"], cutoff=0.5)
+            if lar:
+                found_larasic = False
+                close_matches_lar = get_close_matches(text[i], ["LArASIC"], cutoff=0.3)
                 if close_matches_lar and close_matches_lar[0] == "LArASIC":
                     lar = False
                     text[i] = 'LArASIC'
+                    found_larasic = True
                 else:
                     text.pop(i)
                     i -= 1
+                if found_larasic:
+                    text.insert(0, "BNL")
+                    i += 1
             elif vers:
                 words = text[i].strip("'").split()
                 close_matches_vers = get_close_matches(words[0], ["Version"], cutoff=0.5)
                 if close_matches_vers and close_matches_vers[0] == "Version":
                     vers = False
-                    text[i] = 'Version ' + words[1]
+                    if len(words) == 2:
+                        text[i] = 'Version ' + words[1]
+                    if text[i][9] == 'S':
+                        text[i] = text[i][:9] + '5' + text[i][10:]
+                    if text[i][10] == '8':
+                        text[i] = text[i][:10] + 'B'
+                    text = [re.sub('[^a-zA-Z0-9/-]', '', x) if j > i else x for j, x in enumerate(text) if x.strip() != '']
                 else:
                     text.pop(i)
                     i -= 1                       
             i += 1
-        text = text[:5]
+        if len(text) >= 5:
+            text = text[:5]
+            if len(text[3]) == 5 and text[3][2] != '/':
+                text[3] = text[3][:2] + '/' + text[3][3:]
 
     else:
-        text = [re.sub('[^a-zA-Z0-9]', '', x) for x in text if x.strip() != '']
+        text = [re.sub('[^a-zA-Z0-9.]', '', x) for x in text if x.strip() != '']
         i = 0
         while i < len(text):
             if cold:
@@ -120,21 +133,6 @@ def text_output(im):
     print(text)
     return(text)
 
-from collections import Counter
-
-def average_texts(texts):
-    # Ensure all lists have the same length
-    max_length = max(len(text) for text in texts)
-    padded_texts = [text + [''] * (max_length - len(text)) for text in texts]
-
-    # Calculate element-wise average
-    average_text = []
-    for chars in zip(*padded_texts):
-        counter = Counter(chars)
-        most_common_char = counter.most_common(1)[0][0]
-        average_text.append(most_common_char)
-
-    return average_text
 
 class ImageError(Exception):
     def __init__(self, message):
@@ -161,19 +159,15 @@ def full_test(image, side):
     #     im1 = convert_image(i, 30)
     #     array_of_text.append(text_output(im1))
     for i in array_of_images:
-        j = 30
-        while j <= 90:
-            im1 = convert_image(i)
-            array_of_text.append(text_output(im1))
-            j += 30
-        avg = average_texts(array_of_text)
-        print("this is average:")
-        print(avg)
+        im1 = convert_image(i)
+        array_of_text.append(text_output(im1))
+        # avg = average_texts(array_of_text)
+        # need to write this function if decided to go this way
 
 
 
 def main():
-    image = Image.open('ColdADC_test_images/Full_test_2.jpg')
+    image = Image.open('ColdADC_test_images/Full Test data/IMG_5152.jpg')
     #set parameter two to 1 if it is the front side of the chip or 2 if it is the back side
     full_test(image, 2)
 

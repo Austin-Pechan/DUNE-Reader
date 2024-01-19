@@ -72,8 +72,9 @@ def contour_image(image):
     im2 = cv2.resize(image_array, (0, 0), fx=resize_factor, fy=resize_factor)
     cropped_images = [im2[y:y+h, x:x+w] for x, y, w, h in contour_coordinates]
 
-    # Sort the images based on their coordinates
-    sorted_data = sorted(zip(cropped_images, contour_coordinates), key=lambda x: (x[1][1], x[1][0]))
+    tolerance = 5 
+
+    sorted_data = sorted(zip(cropped_images, contour_coordinates), key=lambda x: (round(x[1][1] / tolerance), round(x[1][0] / tolerance), -x[0][0]))
 
     sorted_images, sorted_coordinates = zip(*sorted_data)
 
