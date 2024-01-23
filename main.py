@@ -135,29 +135,6 @@ def text_output(im):
     print(text)
     return(text)
 
-def read_qr_code(image_path):
-    # Read the image
-    image = cv2.imread(image_path)
-
-    # Convert the image to grayscale
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-    # Use the pyzbar library to decode QR codes
-    qr_codes = decode(gray)
-
-    # Check if any QR codes were detected
-    if qr_codes:
-        # Get the data from the first QR code
-        data = qr_codes[0].data.decode('utf-8')
-        
-        # Print the QR code data
-        print(f"QR Code Data: {data}")
-
-        return data
-    else:
-        print("No QR code found in the image.")
-        return None
-
 
 class ImageError(Exception):
     def __init__(self, message):
@@ -169,7 +146,7 @@ def full_test(image, side):
     array_of_text = []
 
     if side == 1:
-        read_qr_code(image)
+        # read_qr_code(image)
         if len(array_of_images) != 10:
             raise ImageError("contouring failed, please retake the image and try again")
     elif side == 2:
@@ -197,11 +174,33 @@ def read_qr_code(image):
     retval, decoded_info, points, straight_qrcode = qcd.detectAndDecodeMulti(image)
     print(retval)
 
+# def read_qr_code(image_path):
+#     # Read the image
+#     image = cv2.imread(image_path)
+
+#     # Convert the image to grayscale
+#     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+#     # Use the pyzbar library to decode QR codes
+#     qr_codes = decode(gray)
+
+#     # Check if any QR codes were detected
+#     if qr_codes:
+#         # Get the data from the first QR code
+#         data = qr_codes[0].data.decode('utf-8')
+        
+#         # Print the QR code data
+#         print(f"QR Code Data: {data}")
+
+#         return data
+#     else:
+#         print("No QR code found in the image.")
+#         return None
 
 
 def main():
-    qr = cv2.imread('ColdADC_test_images/QR_code_test.png')
-    read_qr_code(qr)
+    # qr = cv2.imread('ColdADC_test_images/QR_code_test.png')
+    # read_qr_code(qr)
     image = Image.open('ColdADC_test_images/FEMB_populated_5.png')
     #set parameter two to 1 if it is the front side of the chip or 2 if it is the back side
     full_test(image, 1)
