@@ -8,6 +8,8 @@ from skimage import io, img_as_ubyte, filters, morphology
 from skimage.restoration import denoise_tv_bregman
 import platform
 import Crop_image
+from pyzbar.pyzbar import decode
+
 
 #Assuming we are only running on either Windows or Linux OS
 OSSystem=platform.system()
@@ -19,7 +21,7 @@ else:
     tes.pytesseract.tesseract_cmd = r'tesseract'
 
 def convert_image(im):
-    im = increase_brightness(im, 0.75)
+    im = increase_brightness(im, .75)
     im = Image.fromarray(im)
     enhancer = ImageEnhance.Contrast(im)
     im = enhancer.enhance(50)
@@ -35,7 +37,7 @@ def convert_image(im):
 
 
     # im1 = im1.filter(ImageFilter.BoxBlur(1))
-    # im1 = im1.rotate(-90)
+    im1 = im1.rotate(-90)
     im1 = im1.filter(ImageFilter.SHARPEN)
 
 
@@ -133,6 +135,29 @@ def text_output(im):
     print(text)
     return(text)
 
+def read_qr_code(image_path):
+    # Read the image
+    image = cv2.imread(image_path)
+
+    # Convert the image to grayscale
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # Use the pyzbar library to decode QR codes
+    qr_codes = decode(gray)
+
+    # Check if any QR codes were detected
+    if qr_codes:
+        # Get the data from the first QR code
+        data = qr_codes[0].data.decode('utf-8')
+        
+        # Print the QR code data
+        print(f"QR Code Data: {data}")
+
+        return data
+    else:
+        print("No QR code found in the image.")
+        return None
+
 
 class ImageError(Exception):
     def __init__(self, message):
@@ -144,6 +169,7 @@ def full_test(image, side):
     array_of_text = []
 
     if side == 1:
+        read_qr_code(image)
         if len(array_of_images) != 10:
             raise ImageError("contouring failed, please retake the image and try again")
     elif side == 2:
@@ -164,12 +190,21 @@ def full_test(image, side):
         # avg = average_texts(array_of_text)
         # need to write this function if decided to go this way
 
+def read_qr_code(image):
+
+    qcd = cv2.QRCodeDetector()
+
+    retval, decoded_info, points, straight_qrcode = qcd.detectAndDecodeMulti(image)
+    print(retval)
+
 
 
 def main():
-    image = Image.open('ColdADC_test_images/Full Test data/IMG_5152.jpg')
+    qr = cv2.imread('ColdADC_test_images/QR_code_test.png')
+    read_qr_code(qr)
+    image = Image.open('ColdADC_test_images/FEMB_populated_5.png')
     #set parameter two to 1 if it is the front side of the chip or 2 if it is the back side
-    full_test(image, 2)
+    full_test(image, 1)
 
 if __name__ == "__main__":
     main()
