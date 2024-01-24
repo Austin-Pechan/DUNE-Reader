@@ -130,7 +130,11 @@ def text_output(im):
                     text.pop(i)
                     i -= 1
             i += 1
+        if text[1].count('.') > 1:
+            first_period_index = text[1].find('.')
+            text[1] = text[1][:first_period_index] + text[1][first_period_index+1:]
         text = text[:4]
+        text = [re.sub('[^a-zA-Z0-9]', '', x) if i > 1 else x for i, x in enumerate(text) if x.strip() != '']
 
     print(text)
     return(text)
@@ -201,7 +205,7 @@ def read_qr_code(image):
 def main():
     # qr = cv2.imread('ColdADC_test_images/QR_code_test.png')
     # read_qr_code(qr)
-    image = Image.open('ColdADC_test_images/FEMB_populated_5.png')
+    image = Image.open('ColdADC_test_images/FEMB_populated_6.png')
     #set parameter two to 1 if it is the front side of the chip or 2 if it is the back side
     full_test(image, 1)
 

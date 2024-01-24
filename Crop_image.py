@@ -23,6 +23,8 @@ def contour_image(image):
     contours_list = []
 
     for i in range(4):
+        #Non-FEMB
+        # target_color = np.array([47 + 10*i, 33 + 10*i, 14 + 10*i])
         target_color = np.array([71 + 10*i, 48 + 10*i, 34 + 10*i])
         lower_color = np.maximum(target_color - tolerance, [0, 0, 0])
         upper_color = np.minimum(target_color + tolerance, [255, 255, 255])
@@ -104,7 +106,7 @@ def contour_image(image):
 
 
 def main():
-    image = Image.open('ColdADC_test_images/FEMB_populated_5.png')
+    image = Image.open('ColdADC_test_images/Full Test data/IMG_5231.jpg')
     cropped_images = contour_image(image)
 
     for i, cropped_image in enumerate(cropped_images):
