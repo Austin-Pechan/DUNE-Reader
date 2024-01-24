@@ -205,7 +205,7 @@ def read_qr_code(image):
 def main():
     # qr = cv2.imread('ColdADC_test_images/QR_code_test.png')
     # read_qr_code(qr)
-    image = Image.open('ColdADC_test_images/FEMB_populated_6.png')
+    image = Image.open('ColdADC_test_images/FEMB_populated_5.png')
     #set parameter two to 1 if it is the front side of the chip or 2 if it is the back side
     full_test(image, 1)
 
