@@ -16,16 +16,17 @@ else:
 
 
 
-def contour_image(image):
+def contour_image(image, tc_lowerbound):
     image_array = np.array(image)
     tolerance = 20
 
     contours_list = []
 
-    for i in range(4):
+    for i in range(8):
         #Non-FEMB
         # target_color = np.array([47 + 10*i, 33 + 10*i, 14 + 10*i])
-        target_color = np.array([71 + 10*i, 48 + 10*i, 34 + 10*i])
+        # target_color = np.array([71 + 10*i, 48 + 10*i, 34 + 10*i])
+        target_color = np.array([tc_lowerbound[0]+5*i, tc_lowerbound[1]+5*i, tc_lowerbound[2]+5*i])
         lower_color = np.maximum(target_color - tolerance, [0, 0, 0])
         upper_color = np.minimum(target_color + tolerance, [255, 255, 255])
         mask = np.all((image_array >= lower_color) & (image_array <= upper_color), axis=-1)
@@ -56,7 +57,7 @@ def contour_image(image):
         edges = cv2.Canny(blurred, 100, 150)
 
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        min_contour_area = 6000
+        min_contour_area = 19000
         min_aspect_ratio = 0.9
         max_aspect_ratio = 1.1
 
@@ -85,7 +86,7 @@ def contour_image(image):
         if not overlapping:
             final_contours.append(cnt)
 
-    image_with_contours = np.copy(im1)
+    # image_with_contours = np.copy(im1)
     # cv2.drawContours(image_with_contours, final_contours, -1, (0, 255, 0), 2)
     # cv2.imshow('Enhanced Image with Contours', image_with_contours)
     # cv2.waitKey(0)
@@ -106,8 +107,9 @@ def contour_image(image):
 
 
 def main():
-    image = Image.open('ColdADC_test_images/Full Test data/IMG_5231.jpg')
-    cropped_images = contour_image(image)
+    image = Image.open('FEMB_polarized_test.png')
+    cropped_images = contour_image(image, [60, 64, 88])
+
 
     for i, cropped_image in enumerate(cropped_images):
         cv2.imshow(f'Cropped Image {i}', cropped_image)

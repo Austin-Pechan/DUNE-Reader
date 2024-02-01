@@ -45,7 +45,7 @@ def convert_image(im):
     # Invert Image
     im1 = ImageOps.invert(im1)
 
-    # im1.show()
+    im1.show()
     return im1
 
 def increase_brightness(image, factor=1.5):
@@ -107,7 +107,7 @@ def text_output(im):
                         text[i] = text[i][:9] + '5' + text[i][10:]
                     if text[i][10] == '8':
                         text[i] = text[i][:10] + 'B'
-                    text = [re.sub('[^a-zA-Z0-9/-]', '', x) if j > i else x for j, x in enumerate(text) if x.strip() != '']
+                    text = [re.sub('[^0-9/-]', '', x) if j > i else x for j, x in enumerate(text) if x.strip() != '']
                 else:
                     text.pop(i)
                     i -= 1                       
@@ -134,7 +134,7 @@ def text_output(im):
             first_period_index = text[1].find('.')
             text[1] = text[1][:first_period_index] + text[1][first_period_index+1:]
         text = text[:4]
-        text = [re.sub('[^a-zA-Z0-9]', '', x) if i > 1 else x for i, x in enumerate(text) if x.strip() != '']
+        text = [re.sub('[^0-9]', '', x) if i > 1 else x for i, x in enumerate(text) if x.strip() != '']
 
     print(text)
     return(text)
@@ -145,8 +145,8 @@ class ImageError(Exception):
         super().__init__(message)
         
 
-def full_test(image, side):
-    array_of_images = Crop_image.contour_image(image)
+def full_test(image, side, tc_lowerbound):
+    array_of_images = Crop_image.contour_image(image, tc_lowerbound)
     array_of_text = []
 
     if side == 1:
@@ -205,9 +205,9 @@ def read_qr_code(image):
 def main():
     # qr = cv2.imread('ColdADC_test_images/QR_code_test.png')
     # read_qr_code(qr)
-    image = Image.open('ColdADC_test_images/FEMB_populated_5.png')
+    image = Image.open('FEMB_polarized_test.png')
     #set parameter two to 1 if it is the front side of the chip or 2 if it is the back side
-    full_test(image, 1)
+    full_test(image, 1, [60, 64, 88])
 
 if __name__ == "__main__":
     main()
