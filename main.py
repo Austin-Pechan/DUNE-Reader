@@ -33,6 +33,26 @@ def convert_image(im):
     im = cv2.resize(im, (0, 0), fx=resize_factor, fy=resize_factor)
 
     im_sharpened = cv2.addWeighted(im, 2, cv2.GaussianBlur(im, (0, 0), 2), -1.5, 0)
+    # kernel_size_1 = 1
+    # kernel_1 = np.ones((kernel_size_1, kernel_size_1), np.uint8)
+    # # kernel_size_2 = 2
+    # # kernel_2 = np.ones((kernel_size_2, kernel_size_2), np.uint8)
+    # # Erosion
+    # eroded_image = cv2.erode(im_sharpened, kernel_1, iterations=1)
+    # # Identify contours in the eroded image
+    # contours, _ = cv2.findContours(eroded_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # # Define a threshold size for black regions to be filtered out
+    # min_contour_area = 1  # Adjust as needed
+
+    # # Remove small black regions
+    # for contour in contours:
+    #     area = cv2.contourArea(contour)
+    #     if area < min_contour_area:
+    #         cv2.drawContours(eroded_image, [contour], -1, (255, 255, 255), thickness=cv2.FILLED)
+
+    # # Dilation
+    # # dilated_image = cv2.dilate(eroded_image, kernel_2, iterations=1)
     im1 = Image.fromarray(im_sharpened)
 
 
@@ -130,11 +150,12 @@ def text_output(im):
                     text.pop(i)
                     i -= 1
             i += 1
-        if text[1].count('.') > 1:
-            first_period_index = text[1].find('.')
-            text[1] = text[1][:first_period_index] + text[1][first_period_index+1:]
-        text = text[:4]
-        text = [re.sub('[^0-9]', '', x) if i > 1 else x for i, x in enumerate(text) if x.strip() != '']
+        if len(text) > 1:
+            if text[1].count('.') > 1:
+                first_period_index = text[1].find('.')
+                text[1] = text[1][:first_period_index] + text[1][first_period_index+1:]
+            text = text[:4]
+            text = [re.sub('[^0-9]', '', x) if i > 1 else x for i, x in enumerate(text) if x.strip() != '']
 
     print(text)
     return(text)
@@ -171,35 +192,6 @@ def full_test(image, side, tc_lowerbound):
         # avg = average_texts(array_of_text)
         # need to write this function if decided to go this way
 
-def read_qr_code(image):
-
-    qcd = cv2.QRCodeDetector()
-
-    retval, decoded_info, points, straight_qrcode = qcd.detectAndDecodeMulti(image)
-    print(retval)
-
-# def read_qr_code(image_path):
-#     # Read the image
-#     image = cv2.imread(image_path)
-
-#     # Convert the image to grayscale
-#     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-#     # Use the pyzbar library to decode QR codes
-#     qr_codes = decode(gray)
-
-#     # Check if any QR codes were detected
-#     if qr_codes:
-#         # Get the data from the first QR code
-#         data = qr_codes[0].data.decode('utf-8')
-        
-#         # Print the QR code data
-#         print(f"QR Code Data: {data}")
-
-#         return data
-#     else:
-#         print("No QR code found in the image.")
-#         return None
 
 
 def main():
