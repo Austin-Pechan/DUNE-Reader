@@ -108,9 +108,13 @@ def contour_image(image, tc_lowerbound):
 
 def main():
     image = Image.open('ColdADC_test_images/New_FEMB_photos/FEMB_71PF_10PL_1s.png')
-    cropped_images = contour_image(image, [38,42,60])
+    cropped_images = contour_image(image, [48,52,74])
     #"ColdADC_test_images/New_FEMB_photos/FEMB_0PF_0PL_2sidebars_800ms.png" = [38,43,50]
-    #"ColdADC_test_images/New_FEMB_photos/FEMB_71PF_10PL_1s.png" = [48,52,74]
+    #Test --> "ColdADC_test_images/New_FEMB_photos/FEMB_71PF_10PL_1s.png" = [48,52,74]
+    #Test --> "ColdADC_test_images/New_FEMB_photos/FEMB_88PF_10PL_2sidebars_788ms.png" = [41,45,62]
+    #"ColdADC_test_images/New_FEMB_photos/FEMB_BACK_0PF_0PL_2sidebars_800ms.png" = [29,33,38]
+    #"ColdADC_test_images/New_FEMB_photos/FEMB_BACK_71PF_10PL_1s.png" = [31,33,47]
+    #"ColdADC_test_images/New_FEMB_photos/FEMB_BACK_88PF_10PL_2sidebars_788ms.png" = [32,34,46]
 
 
     for i, cropped_image in enumerate(cropped_images):
