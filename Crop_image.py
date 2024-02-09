@@ -57,7 +57,7 @@ def contour_image(image, tc_lowerbound):
         edges = cv2.Canny(blurred, 100, 150)
 
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        min_contour_area = 19000
+        min_contour_area = 22000
         min_aspect_ratio = 0.9
         max_aspect_ratio = 1.1
 
@@ -107,8 +107,10 @@ def contour_image(image, tc_lowerbound):
 
 
 def main():
-    image = Image.open('FEMB_polarized_test.png')
-    cropped_images = contour_image(image, [60, 64, 88])
+    image = Image.open('ColdADC_test_images/New_FEMB_photos/FEMB_71PF_10PL_1s.png')
+    cropped_images = contour_image(image, [38,42,60])
+    #"ColdADC_test_images/New_FEMB_photos/FEMB_0PF_0PL_2sidebars_800ms.png" = [38,43,50]
+    #"ColdADC_test_images/New_FEMB_photos/FEMB_71PF_10PL_1s.png" = [48,52,74]
 
 
     for i, cropped_image in enumerate(cropped_images):
