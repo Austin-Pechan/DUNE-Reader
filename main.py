@@ -20,7 +20,7 @@ else:
     print("Running on Linux OS")
     tes.pytesseract.tesseract_cmd = r'tesseract'
 
-def convert_image(im):
+def convert_image(im, resize):
     im = increase_brightness(im, .75)
     im = Image.fromarray(im)
     enhancer = ImageEnhance.Contrast(im)
@@ -29,7 +29,7 @@ def convert_image(im):
     im = np.array(im)
     _, im = cv2.threshold(im, 215, 255, cv2.THRESH_BINARY)
 
-    resize_factor = 1
+    resize_factor = resize
     im = cv2.resize(im, (0, 0), fx=resize_factor, fy=resize_factor)
 
     im_sharpened = cv2.addWeighted(im, 2, cv2.GaussianBlur(im, (0, 0), 2), -1.5, 0)
@@ -65,7 +65,7 @@ def convert_image(im):
     # Invert Image
     im1 = ImageOps.invert(im1)
 
-    im1.show()
+    # im1.show()
     return im1
 
 def increase_brightness(image, factor=1.5):
@@ -86,6 +86,7 @@ def text_output(im):
 
     text = [re.sub('[^a-zA-Z0-9/ -.]', '', x) for x in text if x.strip() != '']
     text = [re.sub('[^a-zA-Z0-9/ -.]', '', x) for x in text if x.strip() != '']
+    # print("raw text: ", text)
 
     # print("this is the pre text: ", text)
     larasic = None
@@ -118,16 +119,24 @@ def text_output(im):
                     i += 1
             elif vers:
                 words = text[i].strip("'").split()
-                close_matches_vers = get_close_matches(words[0], ["Version"], cutoff=0.5)
+                matched_ver = 0
+                for h in range(len(words)):
+                    close_matches_vers = get_close_matches(words[h], ["Version"], cutoff=0.5)
+                    if close_matches_vers and close_matches_vers[0] == "Version":
+                        matched_ver = h
+                        break
+                close_matches_vers = get_close_matches(words[matched_ver], ["Version"], cutoff=0.5)
                 if close_matches_vers and close_matches_vers[0] == "Version":
                     vers = False
-                    if len(words) == 2:
-                        text[i] = 'Version ' + words[1]
-                    if text[i][9] == 'S':
-                        text[i] = text[i][:9] + '5' + text[i][10:]
-                    if text[i][10] == '8':
-                        text[i] = text[i][:10] + 'B'
-                    text = [re.sub('[^0-9/-]', '', x) if j > i else x for j, x in enumerate(text) if x.strip() != '']
+                    text[i] = 'Version '
+                    if len(words) > matched_ver+1:
+                        text[i] = 'Version ' + words[matched_ver+1]
+                    if len(text[i]) > 10:
+                        if text[i][9] == 'S':
+                            text[i] = text[i][:9] + '5' + text[i][10:]
+                        if text[i][10] == '8':
+                            text[i] = text[i][:10] + 'B'
+                        text = [re.sub('[^0-9/-]', '', x) if j > i else x for j, x in enumerate(text) if x.strip() != '']
                 else:
                     text.pop(i)
                     i -= 1                       
@@ -187,7 +196,7 @@ def full_test(image, side, tc_lowerbound):
     #     im1 = convert_image(i, 30)
     #     array_of_text.append(text_output(im1))
     for i in array_of_images:
-        im1 = convert_image(i)
+        im1 = convert_image(i, 1)
         array_of_text.append(text_output(im1))
         # avg = average_texts(array_of_text)
         # need to write this function if decided to go this way
@@ -197,9 +206,9 @@ def full_test(image, side, tc_lowerbound):
 def main():
     # qr = cv2.imread('ColdADC_test_images/QR_code_test.png')
     # read_qr_code(qr)
-    image = Image.open('FEMB_polarized_test.png')
+    image = Image.open('ColdADC_test_images/New_FEMB_photos/FEMB_BACK_0PF_0PL_2sidebars_800ms.png')
     #set parameter two to 1 if it is the front side of the chip or 2 if it is the back side
-    full_test(image, 1, [60, 64, 88])
+    full_test(image, 2, [29,33,38])
 
 if __name__ == "__main__":
     main()
