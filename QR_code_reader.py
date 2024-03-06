@@ -2,29 +2,16 @@ import pytesseract as tes
 from pyzbar.pyzbar import decode
 import cv2
 import numpy as np
+from PIL import Image
 
-def read_qr_code1(image):
-
-    qcd = cv2.QRCodeDetector()
-
-    retval, decoded_info, points, straight_qrcode = qcd.detectAndDecodeMulti(image)
-    if retval:
-        print("the qr scan worked")
-    else:
-        print("the qr scan failed")
-
-def read_qr_code2(image):
-    # Convert the image to grayscale
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-    # Use the pyzbar library to decode QR codes
-    qr_codes = decode(gray)
+def read_qr_code(image):
+    qr_codes = decode(image)
 
     # Check if any QR codes were detected
     if qr_codes:
         # Get the data from the first QR code
         data = qr_codes[0].data.decode('utf-8')
-        
+
         # Print the QR code data
         print(f"QR Code Data: {data}")
 
@@ -33,6 +20,27 @@ def read_qr_code2(image):
         print("No QR code found in the image.")
         return None
     
+def preprocess_image(img):
+    # Convert the image to grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # Apply GaussianBlur to reduce noise
+    blurred = cv2.GaussianBlur(gray, (11, 11), 0)
+
+    # Increase contrast
+    enhancer = cv2.createCLAHE(clipLimit=1.0, tileGridSize=(8, 8))
+    contrast_img = enhancer.apply(blurred)
+
+    # Apply adaptive thresholding
+    _, thresholded = cv2.threshold(contrast_img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    # Use morphological operations to improve QR code visibility
+    kernel = np.ones((3, 3), np.uint8)
+    thresholded = cv2.erode(thresholded, kernel, iterations=1)
+    thresholded = cv2.dilate(thresholded, kernel, iterations=1)
+
+    return thresholded
+
 def make_background_black(image):
     # Convert the image to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -63,22 +71,28 @@ def add_quiet_zone(image, quiet_zone_size):
 
     return new_image
 def main():
-    qr_image = cv2.imread('ColdADC_test_images/QR_code_screenshot_test2.png')
-    im0 = make_background_black(qr_image)
-    im = add_quiet_zone(im0, 30)
+    qr_image = cv2.imread('ColdADC_test_images/New_FEMB_photos/FEMB_0PF_0PL_2sidebars_800ms.png')
+    top_left_x = 1050
+    top_left_y = 1500
+    bottom_right_x = 1200
+    bottom_right_y = 1650
+    cropped_image = qr_image[top_left_y:bottom_right_y, top_left_x:bottom_right_x]
+    # cv2.imshow('Cropped Section', cropped_image)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+
+    im = add_quiet_zone(cropped_image, 60)
     original_height, original_width, _ = im.shape
 
-    # Scale up all dimensions by 10
     scaled_width = original_width * 2
     scaled_height = original_height * 2
 
-    # Resize the image
     im = cv2.resize(im, (scaled_width, scaled_height))
-    cv2.imshow('Result Image', im)
+    im = preprocess_image(im)
+    cv2.imshow('Preprocessed Image', im)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-    read_qr_code1(im)
-    read_qr_code2(im)
+    read_qr_code(im)
 
 if __name__ == "__main__":
     main()

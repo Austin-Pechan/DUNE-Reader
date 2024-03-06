@@ -197,11 +197,27 @@ def full_test(image, side, tc_lowerbound):
     #     array_of_text.append(text_output(im1))
     for i in array_of_images:
         im1 = convert_image(i, 1)
-        array_of_text.append(text_output(im1))
+        txt = text_output(im1)
+        array_of_text.append(txt)
+        if txt[0] == 'BNL':
+            if len(txt) < 5:
+                error_image = Image.fromarray(i)
+                error_image = error_image.rotate(-90)
+                error_image.show()
+                raise OutputTooShortError("Length of output too short")
+        else:
+            if len(txt) < 4:
+                error_image = Image.fromarray(i)
+                error_image = error_image.rotate(-90)
+                error_image.show()
+                raise OutputTooShortError("Length of output too short")
+            
+
         # avg = average_texts(array_of_text)
         # need to write this function if decided to go this way
 
-
+class OutputTooShortError(Exception):
+    pass
 
 def main():
     # qr = cv2.imread('ColdADC_test_images/QR_code_test.png')
