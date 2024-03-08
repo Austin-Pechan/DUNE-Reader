@@ -166,15 +166,19 @@ def get_aspect_ratio(contour):
     _, _, w, h = cv2.boundingRect(contour)
     return float(w) / h if h != 0 else 0
 
+def final_cropping(image, tc_lowerbound, side):
+    cropped_images = crop_image(image, side)
+    refined_cropped_images = []
+    for i, cropped_image in enumerate(cropped_images):
+        refined_cropped_images.append(contour_image(cropped_image, tc_lowerbound))
+    return refined_cropped_images
+
 
 def main():
     original_image = Image.open('ColdADC_test_images/New_FEMB_photos/Test2/With_Polarizer_Ring/FEMB_BACK_2PBars_10PL_88PF_1s.png')
 
     # 1 = front of board (10 chips), 2 = back (8 chips) 
-    cropped_images = crop_image(original_image, 2)
-    refined_cropped_images = []
-    for i, cropped_image in enumerate(cropped_images):
-        refined_cropped_images.append(contour_image(cropped_image, [39, 44, 60]))
+    final_cropping(original_image, [39, 44, 60], 2)
             
 if __name__ == "__main__":
     main()

@@ -63,9 +63,9 @@ def qr_code_full(image):
     return final_txt
 
 def main():
-    qr_image = Image.open('ColdADC_test_images/New_FEMB_photos/Test2/With_Polarizer_Ring/FEMB_BACK_2PBars_10PL_88PF_1s.png')
+    qr_image = Image.open('ColdADC_test_images/New_FEMB_photos/Test2/With_Polarizer_Ring/FEMB_2PBars_10PL_88PF_1s.png')
     txt = qr_code_full(qr_image)
-    print(txt)
+    print("the qr code is: ", txt)
 
 if __name__ == "__main__":
     main()

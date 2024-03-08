@@ -8,6 +8,7 @@ from skimage import io, img_as_ubyte, filters, morphology
 from skimage.restoration import denoise_tv_bregman
 import platform
 import Crop_image
+import Crop_image_area_cluster
 from pyzbar.pyzbar import decode
 from QR_code_reader import qr_code_full
 
@@ -70,6 +71,7 @@ def convert_image(im, resize):
     return im1
 
 def increase_brightness(image, factor=1.5):
+    image = np.array(image)
     image_float = image.astype(np.float32)
     brightened_image = image_float * factor
     brightened_image = np.clip(brightened_image, 0, 255)
@@ -166,7 +168,6 @@ def text_output(im):
                 text[1] = text[1][:first_period_index] + text[1][first_period_index+1:]
             text = text[:4]
             text = [re.sub('[^0-9]', '', x) if i > 1 else x for i, x in enumerate(text) if x.strip() != '']
-
     print(text)
     return(text)
 
@@ -177,17 +178,11 @@ class ImageError(Exception):
         
 
 def full_test(image, side, tc_lowerbound):
-    array_of_images = Crop_image.contour_image(image, tc_lowerbound)
+    array_of_images = Crop_image_area_cluster.final_cropping(image, tc_lowerbound, side)
     array_of_text = []
 
     if side == 1:
         print("QR code is: ", qr_code_full(image))
-        if len(array_of_images) != 10:
-            raise ImageError("contouring failed, please retake the image and try again")
-        
-    elif side == 2:
-        if len(array_of_images) != 8:
-            raise ImageError("contouring failed, please retake the image and try again")
 
     # for i in array_of_images:
     #     cv2.imshow(f'Cropped Image {i}', i)
@@ -226,7 +221,7 @@ def main():
     # read_qr_code(qr)
     image = Image.open('ColdADC_test_images/New_FEMB_photos/Test2/With_Polarizer_Ring/FEMB_2PBars_10PL_88PF_1s.png')
     #set parameter two to 1 if it is the front side of the chip or 2 if it is the back side
-    full_test(image, 2, [39, 44, 60])
+    full_test(image, 1, [39, 44, 60])
 
 if __name__ == "__main__":
     main()
