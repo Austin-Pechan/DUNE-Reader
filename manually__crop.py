@@ -1,8 +1,21 @@
 import cv2
+import cv2
+from PIL import Image
+import numpy as np
 
 class ImageCropper:
-    def __init__(self, image_path):
-        self.image = cv2.imread(image_path)
+    def __init__(self, image_path_or_pil):
+        if isinstance(image_path_or_pil, str):
+            # If a string is provided, assume it's a file path
+            self.image_path = image_path_or_pil
+            self.image = cv2.imread(self.image_path)
+        elif isinstance(image_path_or_pil, Image.Image):
+            # If a PIL Image is provided, convert it to a NumPy array
+            self.image = np.array(image_path_or_pil)
+            self.image_path = None
+        else:
+            raise ValueError("Invalid input. Provide either a file path or a PIL Image.")
+
         self.crop_coordinates = []
         self.crop_in_progress = False
         self.crop_image = None
@@ -72,6 +85,10 @@ class ImageCropper:
 
         cv2.destroyAllWindows()
         return self.crop_image 
+def manually_cropped_image(image_path):
+    cropper = ImageCropper(image_path)
+    cropped_image = cropper.perform_cropping()
+    return cropped_image
 
 if __name__ == "__main__":
     image_path = 'ColdADC_test_images/New_FEMB_photos/FEMB_88PF_10PL_2sidebars_788ms.png' 

@@ -9,6 +9,7 @@ from skimage.restoration import denoise_tv_bregman
 import platform
 import Crop_image
 from pyzbar.pyzbar import decode
+from QR_code_reader import qr_code_full
 
 
 #Assuming we are only running on either Windows or Linux OS
@@ -180,9 +181,10 @@ def full_test(image, side, tc_lowerbound):
     array_of_text = []
 
     if side == 1:
-        # read_qr_code(image)
+        print("QR code is: ", qr_code_full(image))
         if len(array_of_images) != 10:
             raise ImageError("contouring failed, please retake the image and try again")
+        
     elif side == 2:
         if len(array_of_images) != 8:
             raise ImageError("contouring failed, please retake the image and try again")
@@ -222,9 +224,9 @@ class OutputTooShortError(Exception):
 def main():
     # qr = cv2.imread('ColdADC_test_images/QR_code_test.png')
     # read_qr_code(qr)
-    image = Image.open('ColdADC_test_images/New_FEMB_photos/FEMB_BACK_0PF_0PL_2sidebars_800ms.png')
+    image = Image.open('ColdADC_test_images/New_FEMB_photos/Test2/With_Polarizer_Ring/FEMB_2PBars_10PL_88PF_1s.png')
     #set parameter two to 1 if it is the front side of the chip or 2 if it is the back side
-    full_test(image, 2, [29,33,38])
+    full_test(image, 2, [39, 44, 60])
 
 if __name__ == "__main__":
     main()

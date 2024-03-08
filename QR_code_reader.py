@@ -2,37 +2,29 @@ import pytesseract as tes
 from pyzbar.pyzbar import decode
 import cv2
 import numpy as np
+from PIL import Image
+from qreader import QReader
 
-def read_qr_code1(image):
+def read_qr_code(image, to_binary=False):
+    qreader = QReader()
+    qr_image = image
+    if to_binary:
+        _, qr_image = cv2.threshold(qr_image, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
 
-    qcd = cv2.QRCodeDetector()
+    # Decode the QR code from the cropped image
+    try:
+        # data = read(qr_image)  # Uncomment this line if needed
+        data = qreader.detect_and_decode(image=qr_image)
+        if data:
+            return data
+        else:
+            return "QR code not detected!"
+    except Exception as e:
+        print(f"Error decoding QR code: {e}")
+        return "QR code not detected!"
 
-    retval, decoded_info, points, straight_qrcode = qcd.detectAndDecodeMulti(image)
-    if retval:
-        print("the qr scan worked")
-    else:
-        print("the qr scan failed")
 
-def read_qr_code2(image):
-    # Convert the image to grayscale
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # Use the pyzbar library to decode QR codes
-    qr_codes = decode(gray)
-
-    # Check if any QR codes were detected
-    if qr_codes:
-        # Get the data from the first QR code
-        data = qr_codes[0].data.decode('utf-8')
-        
-        # Print the QR code data
-        print(f"QR Code Data: {data}")
-
-        return data
-    else:
-        print("No QR code found in the image.")
-        return None
-    
 def make_background_black(image):
     # Convert the image to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -47,6 +39,7 @@ def make_background_black(image):
     result[mask > 0] = [255, 255, 255]
 
     return result
+
 def add_quiet_zone(image, quiet_zone_size):
     # Get the dimensions of the original image
     height, width, channels = image.shape
@@ -62,23 +55,17 @@ def add_quiet_zone(image, quiet_zone_size):
     new_image[quiet_zone_size:quiet_zone_size+height, quiet_zone_size:quiet_zone_size+width, :] = image
 
     return new_image
-def main():
-    qr_image = cv2.imread('ColdADC_test_images/qr_code_polarized.png')
-    # im0 = make_background_black(qr_image)
+def qr_code_full(image):
+    qr_image = image.crop((600, 1000, 1600, 2000))
+    qr_image = np.array(qr_image)
     im = add_quiet_zone(qr_image, 60)
-    original_height, original_width, _ = im.shape
+    final_txt = read_qr_code(im)
+    return final_txt
 
-    # Scale up all dimensions by 10
-    scaled_width = original_width * 2
-    scaled_height = original_height * 2
-
-    # Resize the image
-    im = cv2.resize(im, (scaled_width, scaled_height))
-    cv2.imshow('Result Image', im)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-    read_qr_code1(im)
-    read_qr_code2(im)
+def main():
+    qr_image = Image.open('ColdADC_test_images/New_FEMB_photos/Test2/With_Polarizer_Ring/FEMB_BACK_2PBars_10PL_88PF_1s.png')
+    txt = qr_code_full(qr_image)
+    print(txt)
 
 if __name__ == "__main__":
     main()

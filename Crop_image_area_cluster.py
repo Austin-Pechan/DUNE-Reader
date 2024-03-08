@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from PIL import Image, ImageOps, ImageEnhance
 import platform
 import cv2
+from manually__crop import manually_cropped_image
 
 #Assuming we are only running on either Windows or Linux OS
 OSSystem=platform.system()
@@ -17,20 +18,76 @@ else:
 
 def crop_image(image, side):
     cropped_images = []
-    if side == 0:
-        img = image.crop((400, 100, 2900, 2500))
+    if side == 1:
+        #coldata 1
+        img = image.crop((500, 100, 1700, 1100))
+        cropped_images.append(img)
+        #coldata 2
+        img = image.crop((2200, 100, 3600, 1100))
+        cropped_images.append(img)
+        
+        #coldADC 1
+        img = image.crop((400, 950, 1200, 1600))
+        cropped_images.append(img)
+        #coldADC 2
+        img = image.crop((1100, 950, 1900, 1600))
+        cropped_images.append(img)
+        #coldADC 3
+        img = image.crop((2000, 950, 3000, 1600))
+        cropped_images.append(img)
+        #coldADC 4
+        img = image.crop((2800, 950, 3700, 1600))
+        cropped_images.append(img)
+
+        #larasic 1
+        img = image.crop((400, 1600, 1200, 2300))
+        cropped_images.append(img)
+        #larasic 2
+        img = image.crop((1100, 1600, 1900, 2300))
+        cropped_images.append(img)
+        #larasic 3
+        img = image.crop((2000, 1600, 3000, 2300))
+        cropped_images.append(img)
+        #larasic 4
+        img = image.crop((2800, 1600, 3700, 2300))
         cropped_images.append(img)
     else: 
-        print("hi")
+        #coldADC 1
+        img = image.crop((400, 950, 1200, 1600))
+        cropped_images.append(img)
+        #coldADC 2
+        img = image.crop((1100, 950, 1900, 1600))
+        cropped_images.append(img)
+        #coldADC 3
+        img = image.crop((2000, 950, 3000, 1600))
+        cropped_images.append(img)
+        #coldADC 4
+        img = image.crop((2800, 950, 3700, 1600))
+        cropped_images.append(img)
+
+        #larasic 1
+        img = image.crop((400, 1600, 1200, 2300))
+        cropped_images.append(img)
+        #larasic 2
+        img = image.crop((1100, 1600, 1900, 2300))
+        cropped_images.append(img)
+        #larasic 3
+        img = image.crop((2000, 1600, 3000, 2300))
+        cropped_images.append(img)
+        #larasic 4
+        img = image.crop((2800, 1600, 3700, 2300))
+        cropped_images.append(img)
 
     return cropped_images
 
-def contour_image(image, tc_lowerbound):
+def original_contour_cropping(image, tc_lowerbound):
     image_array = np.array(image)
     tolerance = 20
-
     largest_contour = None
     largest_contour_area = 0
+    min_contour_area = 22000
+    min_aspect_ratio = 0.9
+    max_aspect_ratio = 1.1
 
     for i in range(8):
         target_color = np.array([tc_lowerbound[0] + 5 * i, tc_lowerbound[1] + 5 * i, tc_lowerbound[2] + 5 * i])
@@ -42,13 +99,12 @@ def contour_image(image, tc_lowerbound):
 
         enhanced_image = Image.fromarray(enhanced_image_array)
         enhanced_image = ImageOps.invert(enhanced_image)
-        enh = np.array(enhanced_image)
         enhancer = ImageEnhance.Contrast(enhanced_image)
         enhanced_image = enhancer.enhance(1000)
 
         im1 = np.array(enhanced_image)
 
-        resize_factor = 0.7
+        resize_factor = 1
         im1 = cv2.resize(im1, (0, 0), fx=resize_factor, fy=resize_factor)
 
         image_float = im1.astype(np.float32)
@@ -63,39 +119,62 @@ def contour_image(image, tc_lowerbound):
 
         edges = cv2.Canny(blurred, 100, 150)
 
-        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE) 
 
-        for cnt in contours:
-            contour_area = cv2.contourArea(cnt)
-            if contour_area > largest_contour_area:
-                largest_contour = cnt
-                largest_contour_area = contour_area
+        # Find the largest contour
+        if contours:
+            for contour in contours:
+                current_contour_area = cv2.contourArea(contour)
+                current_aspect_ratio = get_aspect_ratio(contour)
 
-    return largest_contour
+                # Filter contours based on minimum area and aspect ratio
+                if current_contour_area > min_contour_area and min_aspect_ratio < current_aspect_ratio < max_aspect_ratio:
+                    if current_contour_area > largest_contour_area:
+                        largest_contour = contour
+                        largest_contour_area = current_contour_area
+
+    if largest_contour is not None:
+        x, y, w, h = cv2.boundingRect(largest_contour)
+        cropped_image = Image.fromarray(image_array[y:y+h, x:x+w])
+        cv2.imshow('img', np.array(cropped_image))
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+        return cropped_image
+
+    return None
+
+def contour_image(image, tc_lowerbound):
+    original_cropped_image = original_contour_cropping(image, tc_lowerbound)
+
+    if original_cropped_image is not None:
+        # Convert the PIL Image to a NumPy array before using cv2.imshow
+        return original_cropped_image
+    else:
+        print("Original contour-based cropping returned None. Performing manual cropping...")
+        manual_cropped_image = manually_cropped_image(image)
+
+        if manual_cropped_image is not None:
+            # Convert the PIL Image to a NumPy array before using cv2.imshow
+            cv2.imshow('Manual Cropped Image', np.array(manual_cropped_image))
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+            return manual_cropped_image
+
+    return None
+
+def get_aspect_ratio(contour):
+    _, _, w, h = cv2.boundingRect(contour)
+    return float(w) / h if h != 0 else 0
 
 
 def main():
-    #"ColdADC_test_images/New_FEMB_photos/FEMB_0PF_0PL_2sidebars_800ms.png" = [38,43,50]
-    #Test --> "ColdADC_test_images/New_FEMB_photos/FEMB_71PF_10PL_1s.png" = [48,52,74]
-    #Test --> "ColdADC_test_images/New_FEMB_photos/FEMB_88PF_10PL_2sidebars_788ms.png" = [41,45,62]
-    #"ColdADC_test_images/New_FEMB_photos/FEMB_BACK_0PF_0PL_2sidebars_800ms.png" = [29,33,38]
-    #"ColdADC_test_images/New_FEMB_photos/FEMB_BACK_71PF_10PL_1s.png" = [31,33,47]
-    #"ColdADC_test_images/New_FEMB_photos/FEMB_BACK_88PF_10PL_2sidebars_788ms.png" = [32,34,46]
-
-    original_image = Image.open('ColdADC_test_images/New_FEMB_photos/FEMB_71PF_10PL_1s.png')
+    original_image = Image.open('ColdADC_test_images/New_FEMB_photos/Test2/With_Polarizer_Ring/FEMB_BACK_2PBars_10PL_88PF_1s.png')
 
     # 1 = front of board (10 chips), 2 = back (8 chips) 
-    cropped_images = crop_image(original_image, 0)
-
+    cropped_images = crop_image(original_image, 2)
+    refined_cropped_images = []
     for i, cropped_image in enumerate(cropped_images):
-        # Apply contour_image function to each cropped image
-        refined_images = contour_image(cropped_image, [48, 52, 74])
-
-        # Display the refined images
-        for j, refined_image in enumerate(refined_images):
-            cv2.imshow(f'Refined Image {i}_{j}', np.array(refined_image))
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
-
+        refined_cropped_images.append(contour_image(cropped_image, [39, 44, 60]))
+            
 if __name__ == "__main__":
     main()
