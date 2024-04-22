@@ -7,9 +7,12 @@ from difflib import get_close_matches
 from skimage import io, img_as_ubyte, filters, morphology
 from skimage.restoration import denoise_tv_bregman
 import platform
+import subprocess
+import os
+import tempfile
 import Crop_image
 import Crop_image_area_cluster
-from pyzbar.pyzbar import decode
+# from pyzbar.pyzbar import decode
 from QR_code_reader import qr_code_full
 
 
@@ -168,7 +171,8 @@ def text_output(im):
                 text[1] = text[1][:first_period_index] + text[1][first_period_index+1:]
             text = text[:4]
             text = [re.sub('[^0-9]', '', x) if i > 1 else x for i, x in enumerate(text) if x.strip() != '']
-    print(text)
+        text = [re.sub('[^a-zA-Z0-9.]', '', x) for x in text if x.strip() != '']
+    # print(text)
     return(text)
 
 
@@ -192,36 +196,64 @@ def full_test(image, side, tc_lowerbound):
     # for i in array_of_images:
     #     im1 = convert_image(i, 30)
     #     array_of_text.append(text_output(im1))
-    for i in array_of_images:
-        im1 = convert_image(i, 1)
+    for i in range(len(array_of_images)):
+        im1 = convert_image(array_of_images[i], 1)
         txt = text_output(im1)
-        array_of_text.append(txt)
         if txt[0] == 'BNL':
-            if len(txt) < 5:
-                error_image = Image.fromarray(i)
-                error_image = error_image.rotate(-90)
-                error_image.show()
-                raise OutputTooShortError("Length of output too short")
+            if len(txt) != 5:
+                error_img(array_of_images[i])
+                txt = manual_text_edit(txt)
+            elif len(txt[4]) != 9:
+                error_img(array_of_images[i])
+                txt = manual_text_edit(txt)
         else:
-            if len(txt) < 4:
-                error_image = Image.fromarray(i)
-                error_image = error_image.rotate(-90)
-                error_image.show()
-                raise OutputTooShortError("Length of output too short")
+            if len(txt) != 4:
+                error_img(array_of_images[i])
+                txt = manual_text_edit(txt)
+            elif len(txt[1]) != 9:
+                error_img(array_of_images[i])
+                txt = manual_text_edit(txt)
+            elif len(txt[2]) != 5:
+                error_img(array_of_images[i])
+                txt = manual_text_edit(txt)
+            elif len(txt[3]) != 4:
+                error_img(array_of_images[i])
+                txt = manual_text_edit(txt)        
+        array_of_text.append(txt)
+    for txt_output in array_of_text:
+        print(txt_output)
             
 
         # avg = average_texts(array_of_text)
         # need to write this function if decided to go this way
+def manual_text_edit(original_text):
+    edited_text = original_text.copy()
 
-class OutputTooShortError(Exception):
-    pass
+    temp_file_name = "temp_edit_file.txt"
+    with open(temp_file_name, 'w') as temp_file:
+        temp_file.write('\n'.join(edited_text))
+
+    editor = 'notepad' if platform.system() == 'Windows' else 'vim'
+    subprocess.run([editor, temp_file_name])
+
+    with open(temp_file_name, 'r') as temp_file_read:
+        edited_text = temp_file_read.read().splitlines()
+
+    os.remove(temp_file_name)
+
+    return edited_text
+
+def error_img(img):
+    error_image = np.array(img)
+    error_image = Image.fromarray(error_image)
+    error_image = error_image.rotate(-90)
+    error_image.show()
 
 def main():
-    # qr = cv2.imread('ColdADC_test_images/QR_code_test.png')
-    # read_qr_code(qr)
-    image = Image.open('ColdADC_test_images/New_FEMB_photos/Test2/With_Polarizer_Ring/FEMB_2PBars_10PL_88PF_1s.png')
+    image = Image.open('ColdADC_test_images/New_FEMB_photos/Test2/With_Polarizer_Ring/FEMB_88PF_10PL_1s_2HPBars.png')
     #set parameter two to 1 if it is the front side of the chip or 2 if it is the back side
-    full_test(image, 1, [39, 44, 60])
+    full_test(image, 1, [34, 40, 52])
+    #[34, 40, 52]
 
 if __name__ == "__main__":
     main()
