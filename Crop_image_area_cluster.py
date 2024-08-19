@@ -86,6 +86,7 @@ def crop_image(image, side):
             y_1 = 1100
             for i in range(1,7):
                 img = image.crop((x_1, y_1, x_1+310, y_1+300))
+                img = img.rotate(90)
                 cropped_images.append(img)
                 y_1 += 300
             x_1 += 285
@@ -165,14 +166,14 @@ def contour_image(image, tc_lowerbound):
         return original_cropped_image
     else:
         print("Original contour-based cropping returned None. Performing manual cropping...")
-        # manual_cropped_image = manually_cropped_image(image)
+        manual_cropped_image = manually_cropped_image(image)
 
-        # if manual_cropped_image is not None:
-        #     # Convert the PIL Image to a NumPy array before using cv2.imshow
-        #     cv2.imshow('Manual Cropped Image', np.array(manual_cropped_image))
-        #     cv2.waitKey(0)
-        #     cv2.destroyAllWindows()
-        #     return manual_cropped_image
+        if manual_cropped_image is not None:
+            # Convert the PIL Image to a NumPy array before using cv2.imshow
+            cv2.imshow('Manual Cropped Image', np.array(manual_cropped_image))
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+            return manual_cropped_image
 
     return None
 
@@ -189,13 +190,9 @@ def final_cropping(image, tc_lowerbound, side):
 
 
 def main():
-    # print("Tray 1:")
-    # original_image = Image.open('Irvine_tray_1.JPG')
-    # # 1 = front of board (10 chips), 2 = back (8 chips) 3 = Irvine tray
-    # final_cropping(original_image, [75, 85, 100], 3)
-    print("Tray 2:")
-    original_image = Image.open('Irvine_tray_2.JPG')
-    final_cropping(original_image, [75, 80, 100], 3)
+    original_image = Image.open('Irvine_tray_1.JPG')
+    # 1 = front of board (10 chips), 2 = back (8 chips) 3 = Irvine tray
+    final_cropping(original_image, [75, 80, 95], 3)      
             
 if __name__ == "__main__":
     main()
