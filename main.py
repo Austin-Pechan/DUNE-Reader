@@ -193,9 +193,9 @@ def full_test(image, side, tc_lowerbound):
     
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
-    # for i in array_of_images:
-    #     im1 = convert_image(i, 30)
-    #     array_of_text.append(text_output(im1))
+    for i in array_of_images:
+        im1 = convert_image(i, 30)
+        array_of_text.append(text_output(im1))
     for i in range(len(array_of_images)):
         im1 = convert_image(array_of_images[i], 1)
         txt = text_output(im1)
@@ -250,10 +250,12 @@ def error_img(img):
     error_image.show()
 
 def main():
-    image = Image.open('ColdADC_test_images/New_FEMB_photos/Test2/With_Polarizer_Ring/FEMB_88PF_10PL_1s_2HPBars.png')
+    image = Image.open('Irvine_tray_1.JPG')
     #set parameter two to 1 if it is the front side of the chip or 2 if it is the back side
-    #3 if the chip tray is from Irvine
-    full_test(image, 3, [34, 40, 52])
+    #3 if the chip tray is from Irvine. For Irvine use [75, 80, 95]
+    full_test(image, 3, [75, 80, 95])
+
+
     #[34, 40, 52]
 
 if __name__ == "__main__":

@@ -90,7 +90,6 @@ def crop_image(image, side):
                 cropped_images.append(img)
                 y_1 += 300
             x_1 += 285
-        print(len(cropped_images))
 
 
     return cropped_images
