@@ -51,7 +51,7 @@ def crop_image(image, side):
         #larasic 4
         img = image.crop((2800, 1600, 3700, 2300))
         cropped_images.append(img)
-    else: 
+    elif side == 2: 
         #coldADC 1
         img = image.crop((400, 950, 1200, 1600))
         cropped_images.append(img)
@@ -77,6 +77,20 @@ def crop_image(image, side):
         #larasic 4
         img = image.crop((2800, 1600, 3700, 2300))
         cropped_images.append(img)
+    elif side == 3:
+        img = image.crop((1000, 1100, 5350, 2925))
+        img = image.crop((1300, 1100, 5350, 2925))
+        x_1=1000
+        y_1 = 1100
+        for i in range(1,16):
+            y_1 = 1100
+            for i in range(1,7):
+                img = image.crop((x_1, y_1, x_1+310, y_1+300))
+                cropped_images.append(img)
+                y_1 += 300
+            x_1 += 285
+        print(len(cropped_images))
+
 
     return cropped_images
 
@@ -136,9 +150,9 @@ def original_contour_cropping(image, tc_lowerbound):
     if largest_contour is not None:
         x, y, w, h = cv2.boundingRect(largest_contour)
         cropped_image = Image.fromarray(image_array[y:y+h, x:x+w])
-        cv2.imshow('img', np.array(cropped_image))
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        # cv2.imshow('img', np.array(cropped_image))
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
         return cropped_image
 
     return None
@@ -151,14 +165,14 @@ def contour_image(image, tc_lowerbound):
         return original_cropped_image
     else:
         print("Original contour-based cropping returned None. Performing manual cropping...")
-        manual_cropped_image = manually_cropped_image(image)
+        # manual_cropped_image = manually_cropped_image(image)
 
-        if manual_cropped_image is not None:
-            # Convert the PIL Image to a NumPy array before using cv2.imshow
-            cv2.imshow('Manual Cropped Image', np.array(manual_cropped_image))
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
-            return manual_cropped_image
+        # if manual_cropped_image is not None:
+        #     # Convert the PIL Image to a NumPy array before using cv2.imshow
+        #     cv2.imshow('Manual Cropped Image', np.array(manual_cropped_image))
+        #     cv2.waitKey(0)
+        #     cv2.destroyAllWindows()
+        #     return manual_cropped_image
 
     return None
 
@@ -175,10 +189,13 @@ def final_cropping(image, tc_lowerbound, side):
 
 
 def main():
-    original_image = Image.open('ColdADC_test_images/New_FEMB_photos/Test2/With_Polarizer_Ring/FEMB_BACK_2PBars_10PL_88PF_1s.png')
-
-    # 1 = front of board (10 chips), 2 = back (8 chips) 
-    final_cropping(original_image, [39, 44, 60], 2)
+    # print("Tray 1:")
+    # original_image = Image.open('Irvine_tray_1.JPG')
+    # # 1 = front of board (10 chips), 2 = back (8 chips) 3 = Irvine tray
+    # final_cropping(original_image, [75, 85, 100], 3)
+    print("Tray 2:")
+    original_image = Image.open('Irvine_tray_2.JPG')
+    final_cropping(original_image, [75, 80, 100], 3)
             
 if __name__ == "__main__":
     main()

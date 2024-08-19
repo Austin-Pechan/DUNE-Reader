@@ -252,7 +252,8 @@ def error_img(img):
 def main():
     image = Image.open('ColdADC_test_images/New_FEMB_photos/Test2/With_Polarizer_Ring/FEMB_88PF_10PL_1s_2HPBars.png')
     #set parameter two to 1 if it is the front side of the chip or 2 if it is the back side
-    full_test(image, 1, [34, 40, 52])
+    #3 if the chip tray is from Irvine
+    full_test(image, 3, [34, 40, 52])
     #[34, 40, 52]
 
 if __name__ == "__main__":
