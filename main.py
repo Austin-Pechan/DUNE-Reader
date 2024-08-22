@@ -184,7 +184,6 @@ class ImageError(Exception):
 def full_test(image, side, tc_lowerbound):
     array_of_images = Crop_image_area_cluster.final_cropping(image, tc_lowerbound, side)
     array_of_text = []
-
     if side == 1:
         print("QR code is: ", qr_code_full(image))
 
@@ -199,6 +198,9 @@ def full_test(image, side, tc_lowerbound):
     for i in range(len(array_of_images)):
         im1 = convert_image(array_of_images[i], 1)
         txt = text_output(im1)
+        if len(txt) == 0:
+            error_img(array_of_images[i])
+            txt = manual_text_edit(txt)
         if txt[0] == 'BNL':
             if len(txt) != 5:
                 error_img(array_of_images[i])
